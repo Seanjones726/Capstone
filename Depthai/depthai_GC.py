@@ -5,7 +5,7 @@ from pathlib import Path
 import cv2
 import depthai as dai
 import platform
-
+import time
 import numpy as np
 
 from depthai_helpers.arg_manager import parseArgs
@@ -296,7 +296,9 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
                         sending = 10
                     else:
                         sending = 2
-                        nnManager.arduinoSend(sending)
+                        nnManager.timeEnd = time.time()
+                        if(nnManager.timeEnd -nnManager.timeStart > 7):
+                            nnManager.arduinoSend(sending)
 
                 def showFramesCallback(frame, name):
                     fps.drawFps(frame, name)
