@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
 import depthai as dai
+import serial
+
 import cv2
 import numpy as np
-
+import time
 from .preview_manager import PreviewManager
 from ..previews import Previews
 from ..utils import loadModule, toTensorResult, frameNorm, toPlanar
@@ -30,7 +32,11 @@ class NNetManager:
         self._labels = labels
         self._confidence = confidence
         self.detection_list = ['stop sign','person']
-        self.arduino = 'com3' #put arduino init here
+        self.arduino = serial.Serial(port='/dev/ttyACM0', baudrate=2000000, timeout=0.1) #put arduino init here'/dev/ttyACM0'
+        self.last_value = 1
+        self.timeStart = 0
+        self.timeEnd = 99999999999999
+
 
     #: list: List of available neural network inputs
     sourceChoices = ("color", "left", "right", "rectifiedLeft", "rectifiedRight", "host")
@@ -304,8 +310,10 @@ class NNetManager:
                     yMeters = detection.spatialCoordinates.y / 1000
                     zMeters = detection.spatialCoordinates.z / 1000
                     if self.getLabelText(detection.label) in self.detection_list:
-                        if zMeters < 2 :
+                        if zMeters < 3 :
                             self.arduinoSend(9)
+                            if(self.getLabelText(detection.label) == 'stop sign'):
+                                self.sendStop()
                         elif zMeters < 6 :
                             self.arduinoSend(1)
                     cv2.putText(frame, "X: {:.2f} m".format(xMeters), (bbox[0] + 10, bbox[1] + 60),
@@ -393,4 +401,26 @@ class NNetManager:
         self._countLabel = label
 
     def arduinoSend(self,sending):
-        print("Sending : ",sending)
+        data_return = self.arduino.readline()
+        if(sending != self.last_value):
+            if(sending == 9):
+                self.timeStart = time.time()
+                print("Sending : ",sending)
+                self.arduino.write(bytes(str(sending), 'utf-8'))
+                self.last_value = sending
+
+            #elif(self.last_value == 9):
+             #   self.timeEnd = time.time()
+              #  print("Time diff : " , self.timeStart -self.last_value )
+               # if(self.timeStart -self.last_value > 1633536197.5):
+                #    print("Time diff : " , self.timeStart -self.last_value )
+                 #   print("Sending : ",sending)
+                    #put arduino send here
+                  #  self.last_value = sending
+            else:
+                print("Sending : ",sending)
+                self.arduino.write(bytes(str(sending), 'utf-8'))
+                self.last_value = sending
+    def sendStop(self):
+        print("Turning Right")
+
