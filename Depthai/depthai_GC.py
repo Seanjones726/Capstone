@@ -297,7 +297,7 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
                     else:
                         sending = 2
                         nnManager.timeEnd = time.time()
-                        if(nnManager.timeEnd -nnManager.timeStart > 7):
+                        if(nnManager.timeEnd -nnManager.timeStart > 5):
                             nnManager.arduinoSend(sending)
 
                 def showFramesCallback(frame, name):
