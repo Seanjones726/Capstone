@@ -21,6 +21,8 @@ SIGMA_MAX = int(os.getenv("SIGMA_MAX", 250))
 LRCT_MIN = int(os.getenv("LRCT_MIN", 0))
 LRCT_MAX = int(os.getenv("LRCT_MAX", 10))
 
+start_v = 1
+
 print('Using depthai module from: ', dai.__file__)
 print('Depthai version installed: ', dai.__version__)
 if platform.machine() not in ['armv6l', 'aarch64']:
@@ -283,6 +285,10 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
             if conf.useNN:
                 inNn = nnManager.outputQueue.tryGet()
                 if inNn is not None:
+                    if(start_v):
+                        print("Starting")
+                        nnManager.arduinoSend(1)
+                        start_v = 0
                     callbacks.onNn(inNn)
                     if not conf.useCamera and conf.args.sync:
                         hostFrame = Previews.nnInput.value(hostOut.get())
@@ -293,12 +299,16 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
                 if conf.useNN:
                     nnManager.draw(pv, nnData)
                     if nnData:
-                        sending = 10
+                        sending = 9
                     else:
-                        sending = 2
+                        sending = nnManager.base_speed
                         nnManager.timeEnd = time.time()
                         if(nnManager.timeEnd -nnManager.timeStart > 5):
                             nnManager.arduinoSend(sending)
+                        elif(start_v):
+                            print("Starting")
+                            nnManager.arduinoSend(sending)
+                            start_v = 0
 
                 def showFramesCallback(frame, name):
                     fps.drawFps(frame, name)
