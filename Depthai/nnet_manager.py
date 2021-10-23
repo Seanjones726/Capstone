@@ -37,8 +37,9 @@ class NNetManager:
         self.last_value = 1
         self.timeStart = 0
         self.timeEnd = 99999999999999
-        self.computer = serial.Serial(port = 'serial1', baudrate=115200, timeout=0.1)
-
+        self.computer = serial.Serial(port = '/dev/serial0', baudrate=9600, timeout=0.1)
+        self.base_speed=2
+        
     #: list: List of available neural network inputs
     sourceChoices = ("color", "left", "right", "rectifiedLeft", "rectifiedRight", "host")
     #: str: Selected neural network input
@@ -311,14 +312,18 @@ class NNetManager:
                     yMeters = detection.spatialCoordinates.y / 1000
                     zMeters = detection.spatialCoordinates.z / 1000
                     if self.getLabelText(detection.label) in self.detection_list:
-                        if zMeters < 3 and zMeters > 0:
+                        if zMeters < 8 and zMeters > 0:
                             self.arduinoSend(9)
                             if(self.getLabelText(detection.label) == 'stop sign'):
                                 self.sendStop()
-                        elif zMeters < 6 :
+                        elif zMeters < 9.9 :
                             self.timeEnd = time.time()
                             if(self.timeEnd -self.timeStart > 5):
                                 self.arduinoSend(1)
+                    else:
+                        self.timeEnd = time.time()
+                        if(self.timeEnd -self.timeStart > 5):
+                            self.arduinoSend(self.base_speed)
                     cv2.putText(frame, "X: {:.2f} m".format(xMeters), (bbox[0] + 10, bbox[1] + 60),
                                 self._textType, 0.5, self._textBgColor, 4, self._lineType)
                     cv2.putText(frame, "X: {:.2f} m".format(xMeters), (bbox[0] + 10, bbox[1] + 60),
@@ -432,6 +437,10 @@ class NNetManager:
         
 
     def sendStop(self):
+        data=self.computer.readline()
         turn = 1
         self.computer.write(bytes(str(turn),'utf-8'))
+        print("Sending to Computer", turn)
+        time.sleep(3)
 
+        
