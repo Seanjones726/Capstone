@@ -334,6 +334,7 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
 
             key = cv2.waitKey(1)
             if key == ord('q'):
+                nnManager.arduinoSend(9)
                 break
             elif key == ord('m'):
                 nextFilter = next(medianFilters)
