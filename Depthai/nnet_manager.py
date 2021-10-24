@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from sys import last_value
 import depthai as dai
 import serial
 
@@ -39,6 +40,7 @@ class NNetManager:
         self.timeEnd = 99999999999999
         self.computer = serial.Serial(port = '/dev/serial0', baudrate=9600, timeout=0.1)
         self.base_speed=2
+        self.stop_sign_timer = 0
         
     #: list: List of available neural network inputs
     sourceChoices = ("color", "left", "right", "rectifiedLeft", "rectifiedRight", "host")
@@ -315,7 +317,8 @@ class NNetManager:
                         if zMeters < 8 and zMeters > 0:
                             self.arduinoSend(9)
                             if(self.getLabelText(detection.label) == 'stop sign'):
-                                self.sendStop()
+                                if(self.time.time() -self.stop_sign_timer > 5):
+                                    self.sendStop()
                         elif zMeters < 9.9 :
                             self.timeEnd = time.time()
                             if(self.timeEnd -self.timeStart > 5):
@@ -421,11 +424,14 @@ class NNetManager:
         elif(sending != self.last_value):
             if((sending == 1)):
                 self.timeStart = time.time()
-                
                 print("Sending : ",sending)
                 self.arduino.write(bytes(str(sending), 'utf-8'))
                 self.last_value = sending
-
+            elif(last_value == 9):
+                print("Sending : ",1)
+                self.arduino.write(bytes(str(1), 'utf-8'))
+                self.last_value = 1
+                self.timeStart = time.time()
             else:
                 print("Sending : ",sending)
                 self.arduino.write(bytes(str(sending), 'utf-8'))
