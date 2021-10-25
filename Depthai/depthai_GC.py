@@ -300,7 +300,15 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
                     nnManager.draw(pv, nnData)
                     if nnData:
                         sending = 9
+                        if(nnManager.just_stopped):
+                            if(time.time() - nnManager.stop_sign_timer > 10):
+                                nnManager.detection_list.append('stop sign')
+                                nnManager.just_stopped = 0
                     else:
+                        if(nnManager.just_stopped):
+                            if(time.time() - nnManager.stop_sign_timer > 10):
+                                nnManager.detection_list.append('stop sign')
+                                nnManager.just_stopped = 0
                         sending = nnManager.base_speed
                         nnManager.timeEnd = time.time()
                         if(nnManager.timeEnd -nnManager.timeStart > 5):
