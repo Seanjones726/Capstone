@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from sys import last_value
 import depthai as dai
 import serial
 
@@ -35,7 +34,7 @@ class NNetManager:
         self._confidence = confidence
         self.detection_list = ['stop sign','person']
         self.arduino =  serial.Serial(port='/dev/ttyACM0', baudrate=2000000, timeout=0.1) #put arduino init here'/dev/ttyACM0'
-        self.last_value = 1
+        self.last_value = 9
         self.timeStart = 0
         self.timeEnd = 99999999999999
         self.computer = serial.Serial(port = '/dev/serial0', baudrate=9600, timeout=0.1)
@@ -317,7 +316,7 @@ class NNetManager:
                         if zMeters < 8 and zMeters > 0:
                             self.arduinoSend(9)
                             if(self.getLabelText(detection.label) == 'stop sign'):
-                                if(self.time.time() -self.stop_sign_timer > 5):
+                                if(time.time() -self.stop_sign_timer > 5):
                                     self.sendStop()
                         elif zMeters < 9.9 :
                             self.timeEnd = time.time()
