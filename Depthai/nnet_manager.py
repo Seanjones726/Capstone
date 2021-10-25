@@ -40,6 +40,8 @@ class NNetManager:
         self.computer = serial.Serial(port = '/dev/serial0', baudrate=9600, timeout=0.1)
         self.base_speed=2
         self.stop_sign_timer = 0
+        self.turn_list = [1,2,1,2,1,2,0,0,0]
+        self.just_stopped = 0
         
     #: list: List of available neural network inputs
     sourceChoices = ("color", "left", "right", "rectifiedLeft", "rectifiedRight", "host")
@@ -426,7 +428,7 @@ class NNetManager:
                 print("Sending : ",sending)
                 self.arduino.write(bytes(str(sending), 'utf-8'))
                 self.last_value = sending
-            elif(last_value == 9):
+            elif(self.last_value == 9):
                 print("Sending : ",1)
                 self.arduino.write(bytes(str(1), 'utf-8'))
                 self.last_value = 1
@@ -443,9 +445,11 @@ class NNetManager:
 
     def sendStop(self):
         data=self.computer.readline()
-        turn = 1
+        turn = self.turn_list.pop()
         self.computer.write(bytes(str(turn),'utf-8'))
         print("Sending to Computer", turn)
-        time.sleep(3)
+        self.stop_sign_timer = time.time()
+        self.just_stopped = 1
+        self.detection_list = self.detection_list.remove('stop sign')
 
         
