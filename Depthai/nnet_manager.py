@@ -3,6 +3,10 @@ from pathlib import Path
 import depthai as dai
 import serial
 
+import Rpi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17, GPIO.OUT)
+
 import cv2
 import numpy as np
 import time
@@ -444,6 +448,7 @@ class NNetManager:
         
 
     def sendStop(self):
+        GPIO.output(17,1)
         data=self.computer.readline()
         turn = self.turn_list.pop()
         self.computer.write(bytes(str(turn),'utf-8'))
@@ -451,5 +456,8 @@ class NNetManager:
         self.stop_sign_timer = time.time()
         self.just_stopped = 1
         self.detection_list = self.detection_list.remove('stop sign')
-
+  
+    if Keyboard Interrupt:
+        GPIO.cleanup()
+    
         
