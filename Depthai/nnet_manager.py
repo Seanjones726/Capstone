@@ -2,10 +2,7 @@ import json
 from pathlib import Path
 import depthai as dai
 import serial
-
 import Rpi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
 
 import cv2
 import numpy as np
@@ -14,6 +11,9 @@ from .preview_manager import PreviewManager
 from ..previews import Previews
 from ..utils import loadModule, toTensorResult, frameNorm, toPlanar
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17, GPIO.OUT)
+GPIO.output(17,LOW)
 
 
 class NNetManager:
@@ -448,7 +448,7 @@ class NNetManager:
         
 
     def sendStop(self):
-        GPIO.output(17,1)
+        GPIO.output(17,GPIO.HIGH)
         data=self.computer.readline()
         turn = self.turn_list.pop()
         self.computer.write(bytes(str(turn),'utf-8'))
@@ -456,8 +456,5 @@ class NNetManager:
         self.stop_sign_timer = time.time()
         self.just_stopped = 1
         self.detection_list = self.detection_list.remove('stop sign')
-  
-    if Keyboard Interrupt:
-        GPIO.cleanup()
-    
+        GPIO.output(17,GPIO.LOW)
         
