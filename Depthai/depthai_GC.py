@@ -4,6 +4,7 @@ from itertools import cycle
 from pathlib import Path
 import cv2
 import depthai as dai
+import Rpi.GPIO as GPIO
 import platform
 import time
 import numpy as np
@@ -13,6 +14,9 @@ from depthai_helpers.config_manager import ConfigManager, DEPTHAI_ZOO, DEPTHAI_V
 from depthai_helpers.version_check import checkDepthaiVersion
 from depthai_sdk import FPSHandler, loadModule, getDeviceInfo, downloadYTVideo, Previews
 from depthai_sdk.managers import NNetManager, PreviewManager, PipelineManager, EncodingManager, BlobManager
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(27, GPIO.IN)
 
 DISP_CONF_MIN = int(os.getenv("DISP_CONF_MIN", 0))
 DISP_CONF_MAX = int(os.getenv("DISP_CONF_MAX", 255))
@@ -298,7 +302,13 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
             if conf.useCamera:
                 if conf.useNN:
                     nnManager.draw(pv, nnData)
-                    if nnData:
+                    if GPIO.input(27):
+                        while GPIO.input(27):
+                            nnManager.arduinoSend(9)
+                            time.sleep(1)
+                            print("Program Paused")
+
+                        if nnData:
                         sending = 9
                         if(nnManager.just_stopped):
                             if(time.time() - nnManager.stop_sign_timer > 10):
