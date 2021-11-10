@@ -428,6 +428,7 @@ class NNetManager:
 
         elif(sending != self.last_value):
             if((sending == 1)):
+                GPIO.output(17,GPIO.LOW)
                 self.timeStart = time.time()
                 print("Sending : ",sending)
                 self.arduino.write(bytes(str(sending), 'utf-8'))
@@ -443,18 +444,16 @@ class NNetManager:
                 self.last_value = sending
         elif((sending == 1)):
             self.timeStart = time.time()
+            GPIO.output(17,GPIO.LOW)
 
             
         
 
     def sendStop(self):
         GPIO.output(17,GPIO.HIGH)
-        data=self.computer.readline()
-        turn = self.turn_list.pop()
-        self.computer.write(bytes(str(turn),'utf-8'))
-        print("Sending to Computer", turn)
+        print("Sending High")
         self.stop_sign_timer = time.time()
         self.just_stopped = 1
         self.detection_list = self.detection_list.remove('stop sign')
-        GPIO.output(17,GPIO.LOW)
+        
         
