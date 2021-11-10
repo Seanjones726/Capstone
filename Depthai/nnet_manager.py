@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import depthai as dai
 import serial
-import Rpi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 import cv2
 import numpy as np
@@ -454,6 +454,6 @@ class NNetManager:
         print("Sending High")
         self.stop_sign_timer = time.time()
         self.just_stopped = 1
-        self.detection_list = self.detection_list.remove('stop sign')
+        self.detection_list.remove('stop sign')
         
         
