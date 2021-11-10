@@ -4,7 +4,7 @@ from itertools import cycle
 from pathlib import Path
 import cv2
 import depthai as dai
-import Rpi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import platform
 import time
 import numpy as np
@@ -302,13 +302,13 @@ with dai.Device(pm.pipeline.getOpenVINOVersion(), deviceInfo, usb2Mode=conf.args
             if conf.useCamera:
                 if conf.useNN:
                     nnManager.draw(pv, nnData)
-                    if GPIO.input(27):
-                        while GPIO.input(27):
+                    if GPIO.input(27)==True:
+                        while GPIO.input(27)==True:
                             nnManager.arduinoSend(9)
                             time.sleep(1)
                             print("Program Paused")
 
-                        if nnData:
+                    if nnData:
                         sending = 9
                         if(nnManager.just_stopped):
                             if(time.time() - nnManager.stop_sign_timer > 10):
